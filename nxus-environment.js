@@ -11,6 +11,7 @@ const tester = require('nxus-tester')
 const application = require('nxus-core').application
 const storage = require('nxus-storage').storage
 
+
 class MongoEnvironment extends NodeEnvironment {
   constructor(config) {
     super(config);
@@ -73,23 +74,21 @@ class PuppeteerEnvironment extends MongoEnvironment {
 
 
 class NxusEnvironment extends PuppeteerEnvironment {
+  constructor(config) {
+    super(config);
+    this.config = Object.assign({server: 'index.js'}, config.testEnvironmentOptions)
+  }
+
   async setup() {
     console.log('Setup Nxus Test Environment');
     await super.setup();
-
-    let config = {server: 'index.js'}
-    try {
-      Object.assign(config, require(path.resolve(process.cwd(), 'jest-nxus.config.js')))
-    } catch(e) {
-      console.log(" No jest-nxus.config.js?", e.message)
-    }
     
-    let opts = {
+    let opts = Object.assign({
       watch: false,
-      DEBUG: "nxus:*",
+      DEBUG: (process.env.DEBUG || ""),
       nxus_storage__connections__default__url: this.global.__MONGO_URI__
-    }
-    await tester.startTestServer(config.server, opts)
+    }, this.config.serverEnv || {})
+    await tester.startTestServer(this.config.server, opts)
 
     this.global.tester = tester
     this.global.application = application
