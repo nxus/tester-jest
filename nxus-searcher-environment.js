@@ -24,19 +24,22 @@ class NxusSearcherEnvironment extends NxusEnvironment {
 
   async setup() {
     console.log("Setting up searcher index at", this.searcherIndex)
-    try {
-      await tester.request.put({url:'http://'+this.searcherIndex, baseUrl: null})
-    } catch (e) {
-      console.log("ES error", e)
+    // But let nxus startup actually create the index with settings
+    await super.setup()
+    
+    this.global.tester.searcherRefresh = async () => {
+      await tester.request.post({url:'http://'+this.searcherIndex+"/_refresh", baseUrl: null})
     }
-    return super.setup()
   }
   async teardown() {
     console.log("Tearing down searcher index", this.searcherIndex)
     try {
-      await tester.request.delete({url:'http://'+this.searcherIndex, baseUrl: null})
+      await tester.request.delete({url:'http://'+this.searcherIndex, baseUrl: null, json: true})
     } catch (e) {
-      console.log("ES error", e)
+      // If the index wasn't used at all, not existing isn't an error
+      if (! (e.response && e.response.body && e.response.body.error.type == 'index_not_found_exception')) {
+        console.log("Teardown ES error", e.message)
+      }
     }
     return super.teardown()
   }
