@@ -11,10 +11,14 @@ module.exports = {
 }
 ```
 
-If you need to specify a custom server script for `nxus-tester` `startTestServer`, create a file `jest-nxus.config.js`:
+If your project uses searcher/elasticsearch, use the preset `nxus-tester-jest/nxus-searcher-preset` instead. A test index at `localhost:9200/searcher-jest-test` will be created on setup and deleted on teardown, and configured for the `searcher` storage connection.
+
+You probably want to call `await tester.searcherRefresh()` in your tests after documents are indexed to ensure search has the latest documents.
+
+
+If you need to specify a custom server script or environment vars for `nxus-tester` `startTestServer`, add `testEnvironmentOptions`:
 ```
 module.exports = {
-  server: 'index-test.js'
+  testEnvironmentOptions: {server: 'index-test.js', serverEnv: {nxus_storage...: '...'}}
 }
 ```
-

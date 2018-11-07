@@ -1,0 +1,14 @@
+{
+  "globalSetup": "nxus-tester-jest/setup",
+  "globalTeardown": "nxus-tester-jest/teardown",
+  "testEnvironment": "nxus-tester-jest/nxus-searcher-environment",
+  "testMatch": [
+     "**/__tests__/**/*.js?(x)",
+     "**/test/**/*.js?(x)",
+     "**/?(*.)+(spec|test).js?(x)"
+   ],
+  "testPathIgnorePatterns": [
+     "/node_modules/",
+     "/lib/"
+   ]
+}
