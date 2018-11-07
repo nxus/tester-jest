@@ -85,9 +85,9 @@ class NxusEnvironment extends PuppeteerEnvironment {
     
     let opts = Object.assign({
       watch: false,
-      DEBUG: (process.env.DEBUG || ""),
+      DEBUG: "",
       nxus_storage__connections__default__url: this.global.__MONGO_URI__
-    }, this.config.serverEnv || {})
+    }, this.config.serverEnv || {}, process.env)
     await tester.startTestServer(this.config.server, opts)
 
     this.global.tester = tester
