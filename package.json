@@ -1,6 +1,6 @@
 {
   "name": "nxus-tester-jest",
-  "version": "4.0.3",
+  "version": "4.0.4",
   "description": "Jest environment for nxus tests",
   "main": "nxus-environment.js",
   "scripts": {},
