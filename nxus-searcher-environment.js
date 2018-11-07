@@ -10,10 +10,10 @@ class NxusSearcherEnvironment extends NxusEnvironment {
       config.testEnvironmentOptions.serverEnv = {}
     }
     if (!config.testEnvironmentOptions.serverEnv.nxus_storage__connections__searcher__index) {
-      config.testEnvironmentOptions.serverEnv.nxus_storage__connections__searcher__index = 'searcher-jest-test'
+      config.testEnvironmentOptions.serverEnv.nxus_storage__connections__searcher__index = process.env.nxus_storage__connections__searcher__index || 'searcher-jest-test'
     }
     if (!config.testEnvironmentOptions.serverEnv.nxus_storage__connections__searcher__host) {
-      config.testEnvironmentOptions.serverEnv.nxus_storage__connections__searcher__host = 'localhost:9200'
+      config.testEnvironmentOptions.serverEnv.nxus_storage__connections__searcher__host = process.env.nxus_storage__connections__searcher__host || 'localhost:9200'
     }
     super(config)
 
