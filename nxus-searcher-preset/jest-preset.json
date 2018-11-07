@@ -9,6 +9,7 @@
    ],
   "testPathIgnorePatterns": [
      "/node_modules/",
-     "/lib/"
+     "/lib/",
+     "/.cache"
    ]
 }
