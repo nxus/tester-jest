@@ -46,6 +46,9 @@ async function setupPuppeteer() {
 
 module.exports = async function() {
   mkdirp.sync(DIR);
+  console.log("Setup: created", DIR)
   await setupMongo()
+  console.log("Setup: mongo at", process.env.MONGO_URL)
   await setupPuppeteer()
+  console.log("Setup: puppeteer started")
 }
