@@ -8,21 +8,24 @@ const os = require('os');
 
 const DIR = path.join(os.tmpdir(), 'jest_global_setup');
 
-
-const mongod = new MongodbMemoryServer.default({
-  instance: {
-    dbName: 'jest'
-  }//,
-//  binary: {
-//    version: '3.4.10'
-//  }
-});
-
 async function setupMongo() {
+  console.log("mongo before")
+  const mongod = new MongodbMemoryServer.default({
+    instance: {
+      dbName: 'jest'
+    }//,
+  //  binary: {
+  //    version: '3.4.10'
+  //  }
+  });
+  console.log("mongo created")
+
   const mongoConfig = {
     mongoDBName: 'jest',
     mongoUri: await mongod.getConnectionString()
   };
+  
+  console.log("mongo connection", mongoConfig)
 
   // Write global config to disk because all tests run in different contexts.
   fs.writeFileSync(path.join(DIR, 'globalConfig'), JSON.stringify(mongoConfig));
