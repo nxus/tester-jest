@@ -6,7 +6,9 @@ const DIR = path.join(os.tmpdir(), 'jest_global_setup');
 
 module.exports = async function() {
   // stop the memory mongo server
-  await global.__MONGOD__.stop();
+  for (s of global.__MONGODS__) {
+    await s.stop();
+  }
 
   // close the browser instance
   await global.__BROWSER_GLOBAL__.close();

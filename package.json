@@ -16,6 +16,7 @@
   "homepage": "https://github.com/nxus/tester-jest/",
   "dependencies": {
     "jest": "^23.6.0",
+    "lodash": "^4.17.11",
     "mongodb": "^3.1.6",
     "mongodb-memory-server": "^2.2.0",
     "nxus-core": "^4.0.0",
