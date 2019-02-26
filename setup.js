@@ -51,6 +51,6 @@ module.exports = async function() {
   console.log("Setup: created", DIR)
   await setupMongo()
   console.log("Setup: mongo server")
-//  await setupPuppeteer()
-//  console.log("Setup: puppeteer started")
+  await setupPuppeteer()
+  console.log("Setup: puppeteer started")
 }

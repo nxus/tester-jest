@@ -2,6 +2,7 @@ const NodeEnvironment = require('jest-environment-node');
 const path = require('path');
 const fs = require('fs');
 
+const RedisServer = require('redis-server')
 const puppeteer = require('puppeteer');
 const os = require('os');
 const difference = require('lodash/difference')
@@ -91,7 +92,7 @@ class Searcher extends Plugin {
   }
 
   async methods() {
-    this.global.tester.searcherRefresh = async () => {
+    this.tester.searcherRefresh = async () => {
       await tester.request.post({url:this.searcherIndex+"/_refresh", baseUrl: null})
     }
   }
@@ -108,17 +109,50 @@ class Searcher extends Plugin {
   }
 }
 
+class WorkerQueue extends Plugin {
+  async setup() {
+    this.redisServer
+    if (! this.config.redis_port) {
+      this.config.redis_port = 6300
+    }
+    // for CI
+    if (process.env.REDIS_URL) {
+      this.config.nxus_worker_queue__redis_url = process.env.REDIS_URL
+    } else {
+      this.config.nxus_worker_queue__redis_url = "redis://localhost:" + this.config.redis_port
+      this.redisServer = new RedisServer(this.config.redis_port)
+      await this.redisServer.open()
+    }
+  }
+  async teardown() {
+    if (this.redisServer) {
+      await this.redisServer.close()
+    }
+  }
+}
+
 class NxusServer extends Plugin {
   async setup() {
     let opts = Object.assign({
       watch: false,
       DEBUG: process.env.DEBUG || "",
     }, this.config, this.config.serverEnv || {})
+
     await tester.startTestServer(this.config.server, opts)
 
     this.global.tester = tester
     this.global.application = application
     this.global.storage = storage
+  }
+
+  async methods() {
+    this.tester.getApplicationModule = function (name) {
+      return application.get(name)
+    }
+    this.tester.createUser = async function (email, password = 'test', admin=false) {
+      let User = await application.get('storage').getModel('users-user')
+      return User.findOrCreate({email}, {email, password, admin, enabled: true})
+    }
   }
   
 }
@@ -130,7 +164,7 @@ class NxusEnvironment extends NodeEnvironment {
 
     this.plugins = []
 
-    //this.newPlugin(Puppeteer)
+    this.newPlugin(Puppeteer)
 
     if (adaptersByModule('sails-mongo').length > 0) {
       this.newPlugin(Mongo)
@@ -138,7 +172,9 @@ class NxusEnvironment extends NodeEnvironment {
     if (adaptersByModule('waterline-elasticsearch').length > 0) {
       this.newPlugin(Searcher)
     }
-    
+    if (nxusConfig.worker_queue) {
+      this.newPlugin(WorkerQueue)
+    }
 
     this.newPlugin(NxusServer)
   }
@@ -151,7 +187,7 @@ class NxusEnvironment extends NodeEnvironment {
     let global = this.global, config = this.config
     for (let plugin of this.plugins) {
       let method = plugin[methodName.toLowerCase()]
-      console.log(methodName, plugin.constructor.name)
+      console.log(methodName, plugin.constructor.name, method ? "" : "(no-op)")
       if (method) {
         let keys = keysOf({global: this.global, config: this.config, tester})
         await method.call(plugin, global, config)
