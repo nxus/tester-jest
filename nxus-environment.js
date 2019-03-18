@@ -86,9 +86,10 @@ class Searcher extends Plugin {
     this.config.nxus_storage__connections__searcher__index = process.env.nxus_storage__connections__searcher__index || 'searcher-jest-test',
     this.config.nxus_storage__connections__searcher__host = process.env.nxus_storage__connections__searcher__host || 'http://localhost:9200'
 
-    this.searcherHost = config.nxus_storage__connections__searcher__host
-    this.searcherIndexName = config.nxus_storage__connections__searcher__index
+    this.searcherHost = this.config.nxus_storage__connections__searcher__host
+    this.searcherIndexName = this.config.nxus_storage__connections__searcher__index
     this.searcherIndex = this.searcherHost+'/'+this.searcherIndexName
+    this.deleteIndex(this.searcherIndex)
   }
 
   async methods() {
@@ -98,14 +99,19 @@ class Searcher extends Plugin {
   }
   
   async teardown() {
+    return this.deleteIndex(this.searcherIndex)
+  }
+
+  async deleteIndex(indexUrl) {
     try {
-      await tester.request.delete({url:this.searcherIndex, baseUrl: null, json: true})
+      await tester.request.delete({url:indexUrl, baseUrl: null, json: true})
     } catch (e) {
       // If the index wasn't used at all, not existing isn't an error
       if (! (e.response && e.response.body && e.response.body.error.type == 'index_not_found_exception')) {
-        console.log("Teardown ES error", e.message)
+        console.log("Delete ES index error", e.message)
       }
     }
+    
   }
 }
 
