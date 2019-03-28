@@ -1,6 +1,6 @@
 {
   "name": "nxus-tester-jest",
-  "version": "4.0.8",
+  "version": "4.0.9",
   "description": "Jest environment for nxus tests",
   "main": "nxus-environment.js",
   "scripts": {},
@@ -16,12 +16,14 @@
   "homepage": "https://github.com/nxus/tester-jest/",
   "dependencies": {
     "jest": "^23.6.0",
+    "lodash": "^4.17.11",
     "mongodb": "^3.1.6",
     "mongodb-memory-server": "^2.2.0",
     "nxus-core": "^4.0.0",
     "nxus-storage": "^4.0.0",
     "nxus-tester": "^4.0.0",
     "puppeteer": "^1.8.0",
+    "redis-server": "^1.2.2",
     "request": "^2.69.0",
     "sails-mongo": "^0.12.1"
   }

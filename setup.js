@@ -1,6 +1,6 @@
 const path = require('path');
 const fs = require('fs');
-const MongodbMemoryServer = require('mongodb-memory-server');
+const MongodbMemoryServer = require('mongodb-memory-server').default;
 
 const puppeteer = require('puppeteer');
 const mkdirp = require('mkdirp');
@@ -8,27 +8,30 @@ const os = require('os');
 
 const DIR = path.join(os.tmpdir(), 'jest_global_setup');
 
-async function setupMongo() {
-  const mongod = new MongodbMemoryServer.default({
-    instance: {
-      dbName: 'jest'
-    }//,
-  //  binary: {
-  //    version: '3.4.10'
-  //  }
-  });
+const adaptersByModule = require('./adaptersByModule')
 
-  const mongoConfig = {
-    mongoDBName: 'jest',
-    mongoUri: await mongod.getConnectionString()
-  };
+async function setupMongo() {
+  const mongoConfig = {}
+  const mongods = []
+
+  const adapters = adaptersByModule('sails-mongo');
+
+  for (var name of adapters) {
+    var mongod = new MongodbMemoryServer({
+      instance: {
+        dbName: name
+      }//,
+    });
+    mongoConfig[name] = {uri: await mongod.getConnectionString()};
+    mongods.push(mongod);
+  }
   
   // Write global config to disk because all tests run in different contexts.
-  fs.writeFileSync(path.join(DIR, 'globalConfig'), JSON.stringify(mongoConfig));
+  fs.writeFileSync(path.join(DIR, 'mongoConfig'), JSON.stringify(mongoConfig));
 
   // Set reference to mongod in order to close the server during teardown.
-  global.__MONGOD__ = mongod;
-  process.env.MONGO_URL = mongoConfig.mongoUri;
+  global.__MONGODS__ = mongods;
+  process.env.MONGO_URIS = mongoConfig;
 };
 
 
@@ -47,7 +50,7 @@ module.exports = async function() {
   mkdirp.sync(DIR);
   console.log("Setup: created", DIR)
   await setupMongo()
-  console.log("Setup: mongo at", process.env.MONGO_URL)
+  console.log("Setup: mongo server")
   await setupPuppeteer()
   console.log("Setup: puppeteer started")
 }
