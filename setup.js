@@ -20,7 +20,10 @@ async function setupMongo() {
     var mongod = new MongodbMemoryServer({
       instance: {
         dbName: name
-      }//,
+      },
+      binary: {
+        version: '3.6.8'
+      }
     });
     mongoConfig[name] = {uri: await mongod.getConnectionString()};
     mongods.push(mongod);
