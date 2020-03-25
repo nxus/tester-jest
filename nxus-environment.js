@@ -59,7 +59,11 @@ class Mongo extends Plugin {
 
     this.global.__MONGO_URIS__ = mongoConfig;
     for (let k in mongoConfig) {
-      this.config["nxus_storage__connections__"+k+"__url"] = mongoConfig[k].uri
+      for (let c in nxusConfig.storage.connections) {
+        if (nxusConfig.storage.connections[c].adapter == k) {
+          this.config["nxus_storage__connections__"+c+"__url"] = mongoConfig[k].uri
+        }
+      }
     }
   }
 }
